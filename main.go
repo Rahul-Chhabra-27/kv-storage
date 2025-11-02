@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/kv-storage/config"
+	kvpb "github.com/kv-storage/proto/kv"
+	"gorm.io/gorm"
 )
 
 const (
@@ -32,6 +34,11 @@ func init() {
 	}
 }
 
+var kvDbConnector *gorm.DB;
+
+type KvService struct {
+	kvpb.UnimplementedKeyValueStoreServer
+}
 // Responsible for starting the server
 func startServer() {
 	// flush logger buffer on exit
@@ -46,16 +53,25 @@ func startServer() {
 		logger.Fatal("Error loading .env file", zap.Error(err))
 	}
 
+	// Connect to the database
+	kvDbConnector, err = config.ConnectDB()
+	if err != nil {
+		logger.Fatal("Error connecting to database", zap.Error(err))
+	}
+
 	// Creating TCP Socket listener on port 50051
 	listener, err := net.Listen("tcp", "localhost:50051")
 	if err != nil {
 		logger.Fatal("Failed to start server", zap.Error(err))
 	}
-
 	// Create a new gRPC server
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(config.UnaryInterceptor),
 	)
+
+	// Register the KvService to the gRPC server
+	kvpb.RegisterKeyValueStoreServer(grpcServer, &KvService{})
+	logger.Info("Serving gRPC", zap.String("address", "localhost:50051"))
 
 	// Start the server in a new goroutine
 	go func() {
@@ -66,9 +82,9 @@ func startServer() {
 
 	// Create a new gRPC-Gateway server
 	// it connect to the gRPC server we just started and act as a grpc client!
-	_, err = grpc.DialContext(
+	connection, err := grpc.DialContext(
 		context.Background(),
-		"localhost:50051",
+		"localhost: 50051",
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -77,6 +93,9 @@ func startServer() {
 	}
 	// Create a new gRPC-Gateway mux
 	gwmux := runtime.NewServeMux()
+	
+	// Register the service to the gRPC Gateway
+	kvpb.RegisterKeyValueStoreHandler(context.Background(),gwmux,connection)
 
 	// Create a new HTTP server
 	gwServer := &http.Server{
