@@ -103,14 +103,20 @@ func local_request_KeyValueStore_SetKeyValue_0(ctx context.Context, marshaler ru
 
 func request_KeyValueStore_DeleteKeyValue_0(ctx context.Context, marshaler runtime.Marshaler, client KeyValueStoreClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetKVRequest
+		protoReq DeleteKeyValueRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["key"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "key")
+	}
+	protoReq.Key, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "key", err)
 	}
 	msg, err := client.DeleteKeyValue(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -118,11 +124,17 @@ func request_KeyValueStore_DeleteKeyValue_0(ctx context.Context, marshaler runti
 
 func local_request_KeyValueStore_DeleteKeyValue_0(ctx context.Context, marshaler runtime.Marshaler, server KeyValueStoreServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetKVRequest
+		protoReq DeleteKeyValueRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok := pathParams["key"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "key")
+	}
+	protoReq.Key, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "key", err)
 	}
 	msg, err := server.DeleteKeyValue(ctx, &protoReq)
 	return msg, metadata, err
@@ -174,13 +186,13 @@ func RegisterKeyValueStoreHandlerServer(ctx context.Context, mux *runtime.ServeM
 		}
 		forward_KeyValueStore_SetKeyValue_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_KeyValueStore_DeleteKeyValue_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodDelete, pattern_KeyValueStore_DeleteKeyValue_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/kv.KeyValueStore/DeleteKeyValue", runtime.WithHTTPPathPattern("/api/kv/delete"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/kv.KeyValueStore/DeleteKeyValue", runtime.WithHTTPPathPattern("/api/kv/{key}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -268,11 +280,11 @@ func RegisterKeyValueStoreHandlerClient(ctx context.Context, mux *runtime.ServeM
 		}
 		forward_KeyValueStore_SetKeyValue_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_KeyValueStore_DeleteKeyValue_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodDelete, pattern_KeyValueStore_DeleteKeyValue_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/kv.KeyValueStore/DeleteKeyValue", runtime.WithHTTPPathPattern("/api/kv/delete"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/kv.KeyValueStore/DeleteKeyValue", runtime.WithHTTPPathPattern("/api/kv/{key}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -291,7 +303,7 @@ func RegisterKeyValueStoreHandlerClient(ctx context.Context, mux *runtime.ServeM
 var (
 	pattern_KeyValueStore_GetKeyValue_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"api", "kv", "key"}, ""))
 	pattern_KeyValueStore_SetKeyValue_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"api", "kv"}, ""))
-	pattern_KeyValueStore_DeleteKeyValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "kv", "delete"}, ""))
+	pattern_KeyValueStore_DeleteKeyValue_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"api", "kv", "key"}, ""))
 )
 
 var (

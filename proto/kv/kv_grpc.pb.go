@@ -30,7 +30,7 @@ const (
 type KeyValueStoreClient interface {
 	GetKeyValue(ctx context.Context, in *GetKVRequest, opts ...grpc.CallOption) (*GetKVResponse, error)
 	SetKeyValue(ctx context.Context, in *SetKeyValueRequest, opts ...grpc.CallOption) (*SetKeyValueResponse, error)
-	DeleteKeyValue(ctx context.Context, in *GetKVRequest, opts ...grpc.CallOption) (*GetKVResponse, error)
+	DeleteKeyValue(ctx context.Context, in *DeleteKeyValueRequest, opts ...grpc.CallOption) (*DeleteKeyValueResponse, error)
 }
 
 type keyValueStoreClient struct {
@@ -61,9 +61,9 @@ func (c *keyValueStoreClient) SetKeyValue(ctx context.Context, in *SetKeyValueRe
 	return out, nil
 }
 
-func (c *keyValueStoreClient) DeleteKeyValue(ctx context.Context, in *GetKVRequest, opts ...grpc.CallOption) (*GetKVResponse, error) {
+func (c *keyValueStoreClient) DeleteKeyValue(ctx context.Context, in *DeleteKeyValueRequest, opts ...grpc.CallOption) (*DeleteKeyValueResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetKVResponse)
+	out := new(DeleteKeyValueResponse)
 	err := c.cc.Invoke(ctx, KeyValueStore_DeleteKeyValue_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (c *keyValueStoreClient) DeleteKeyValue(ctx context.Context, in *GetKVReque
 type KeyValueStoreServer interface {
 	GetKeyValue(context.Context, *GetKVRequest) (*GetKVResponse, error)
 	SetKeyValue(context.Context, *SetKeyValueRequest) (*SetKeyValueResponse, error)
-	DeleteKeyValue(context.Context, *GetKVRequest) (*GetKVResponse, error)
+	DeleteKeyValue(context.Context, *DeleteKeyValueRequest) (*DeleteKeyValueResponse, error)
 	mustEmbedUnimplementedKeyValueStoreServer()
 }
 
@@ -94,7 +94,7 @@ func (UnimplementedKeyValueStoreServer) GetKeyValue(context.Context, *GetKVReque
 func (UnimplementedKeyValueStoreServer) SetKeyValue(context.Context, *SetKeyValueRequest) (*SetKeyValueResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetKeyValue not implemented")
 }
-func (UnimplementedKeyValueStoreServer) DeleteKeyValue(context.Context, *GetKVRequest) (*GetKVResponse, error) {
+func (UnimplementedKeyValueStoreServer) DeleteKeyValue(context.Context, *DeleteKeyValueRequest) (*DeleteKeyValueResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteKeyValue not implemented")
 }
 func (UnimplementedKeyValueStoreServer) mustEmbedUnimplementedKeyValueStoreServer() {}
@@ -155,7 +155,7 @@ func _KeyValueStore_SetKeyValue_Handler(srv interface{}, ctx context.Context, de
 }
 
 func _KeyValueStore_DeleteKeyValue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetKVRequest)
+	in := new(DeleteKeyValueRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ func _KeyValueStore_DeleteKeyValue_Handler(srv interface{}, ctx context.Context,
 		FullMethod: KeyValueStore_DeleteKeyValue_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KeyValueStoreServer).DeleteKeyValue(ctx, req.(*GetKVRequest))
+		return srv.(KeyValueStoreServer).DeleteKeyValue(ctx, req.(*DeleteKeyValueRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

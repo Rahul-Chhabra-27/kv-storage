@@ -23,6 +23,15 @@ message SetKeyValueResponse {
   int64 statusCode = 2;
 }
 
+message DeleteKeyValueRequest{
+  string key = 1;
+}
+
+message DeleteKeyValueResponse{
+  string message = 1;
+  int64 statusCode = 2;
+}
+
 service KeyValueStore {
   rpc GetKeyValue(GetKVRequest) returns (GetKVResponse) {
       option (google.api.http) = {
@@ -35,10 +44,9 @@ service KeyValueStore {
           body: "*"
       };
   }
-  rpc DeleteKeyValue(GetKVRequest) returns (GetKVResponse) {
+  rpc DeleteKeyValue(DeleteKeyValueRequest) returns (DeleteKeyValueResponse) {
       option (google.api.http) = {
-          post: "/api/kv/delete"
-          body: "*"
+          delete: "/api/kv/{key}"
       };
   }
 }

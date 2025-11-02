@@ -230,6 +230,102 @@ func (x *SetKeyValueResponse) GetStatusCode() int64 {
 	return 0
 }
 
+type DeleteKeyValueRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteKeyValueRequest) Reset() {
+	*x = DeleteKeyValueRequest{}
+	mi := &file_kv_kv_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteKeyValueRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteKeyValueRequest) ProtoMessage() {}
+
+func (x *DeleteKeyValueRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_kv_kv_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteKeyValueRequest.ProtoReflect.Descriptor instead.
+func (*DeleteKeyValueRequest) Descriptor() ([]byte, []int) {
+	return file_kv_kv_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *DeleteKeyValueRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+type DeleteKeyValueResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	StatusCode    int64                  `protobuf:"varint,2,opt,name=statusCode,proto3" json:"statusCode,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteKeyValueResponse) Reset() {
+	*x = DeleteKeyValueResponse{}
+	mi := &file_kv_kv_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteKeyValueResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteKeyValueResponse) ProtoMessage() {}
+
+func (x *DeleteKeyValueResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_kv_kv_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteKeyValueResponse.ProtoReflect.Descriptor instead.
+func (*DeleteKeyValueResponse) Descriptor() ([]byte, []int) {
+	return file_kv_kv_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *DeleteKeyValueResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *DeleteKeyValueResponse) GetStatusCode() int64 {
+	if x != nil {
+		return x.StatusCode
+	}
+	return 0
+}
+
 var File_kv_kv_proto protoreflect.FileDescriptor
 
 const file_kv_kv_proto_rawDesc = "" +
@@ -250,11 +346,18 @@ const file_kv_kv_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x1e\n" +
 	"\n" +
 	"statusCode\x18\x02 \x01(\x03R\n" +
-	"statusCode2\x80\x02\n" +
+	"statusCode\")\n" +
+	"\x15DeleteKeyValueRequest\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\"R\n" +
+	"\x16DeleteKeyValueResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\x12\x1e\n" +
+	"\n" +
+	"statusCode\x18\x02 \x01(\x03R\n" +
+	"statusCode2\x8e\x02\n" +
 	"\rKeyValueStore\x12I\n" +
 	"\vGetKeyValue\x12\x10.kv.GetKVRequest\x1a\x11.kv.GetKVResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/api/kv/{key}\x12R\n" +
-	"\vSetKeyValue\x12\x16.kv.SetKeyValueRequest\x1a\x17.kv.SetKeyValueResponse\"\x12\x82\xd3\xe4\x93\x02\f:\x01*\"\a/api/kv\x12P\n" +
-	"\x0eDeleteKeyValue\x12\x10.kv.GetKVRequest\x1a\x11.kv.GetKVResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/api/kv/deleteB\fZ\n" +
+	"\vSetKeyValue\x12\x16.kv.SetKeyValueRequest\x1a\x17.kv.SetKeyValueResponse\"\x12\x82\xd3\xe4\x93\x02\f:\x01*\"\a/api/kv\x12^\n" +
+	"\x0eDeleteKeyValue\x12\x19.kv.DeleteKeyValueRequest\x1a\x1a.kv.DeleteKeyValueResponse\"\x15\x82\xd3\xe4\x93\x02\x0f*\r/api/kv/{key}B\fZ\n" +
 	"./proto/kvb\x06proto3"
 
 var (
@@ -269,20 +372,22 @@ func file_kv_kv_proto_rawDescGZIP() []byte {
 	return file_kv_kv_proto_rawDescData
 }
 
-var file_kv_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_kv_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_kv_kv_proto_goTypes = []any{
-	(*GetKVRequest)(nil),        // 0: kv.GetKVRequest
-	(*GetKVResponse)(nil),       // 1: kv.GetKVResponse
-	(*SetKeyValueRequest)(nil),  // 2: kv.SetKeyValueRequest
-	(*SetKeyValueResponse)(nil), // 3: kv.SetKeyValueResponse
+	(*GetKVRequest)(nil),           // 0: kv.GetKVRequest
+	(*GetKVResponse)(nil),          // 1: kv.GetKVResponse
+	(*SetKeyValueRequest)(nil),     // 2: kv.SetKeyValueRequest
+	(*SetKeyValueResponse)(nil),    // 3: kv.SetKeyValueResponse
+	(*DeleteKeyValueRequest)(nil),  // 4: kv.DeleteKeyValueRequest
+	(*DeleteKeyValueResponse)(nil), // 5: kv.DeleteKeyValueResponse
 }
 var file_kv_kv_proto_depIdxs = []int32{
 	0, // 0: kv.KeyValueStore.GetKeyValue:input_type -> kv.GetKVRequest
 	2, // 1: kv.KeyValueStore.SetKeyValue:input_type -> kv.SetKeyValueRequest
-	0, // 2: kv.KeyValueStore.DeleteKeyValue:input_type -> kv.GetKVRequest
+	4, // 2: kv.KeyValueStore.DeleteKeyValue:input_type -> kv.DeleteKeyValueRequest
 	1, // 3: kv.KeyValueStore.GetKeyValue:output_type -> kv.GetKVResponse
 	3, // 4: kv.KeyValueStore.SetKeyValue:output_type -> kv.SetKeyValueResponse
-	1, // 5: kv.KeyValueStore.DeleteKeyValue:output_type -> kv.GetKVResponse
+	5, // 5: kv.KeyValueStore.DeleteKeyValue:output_type -> kv.DeleteKeyValueResponse
 	3, // [3:6] is the sub-list for method output_type
 	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -301,7 +406,7 @@ func file_kv_kv_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_kv_kv_proto_rawDesc), len(file_kv_kv_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

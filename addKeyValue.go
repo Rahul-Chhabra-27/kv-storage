@@ -38,10 +38,28 @@ func (KvServerManager *KvService) SetKeyValue(ctx context.Context, request *kvpb
 				Message: "Key-value pair successfully created",
 				StatusCode : int64(StatusCreated),
 			}, nil
+	} else if KeyNotFoundError == nil {
+		// Key exists — update its value
+		updateResult := kvDbConnector.Model(&existingKeyValuePair).Update("value", value)
+		if updateResult.Error != nil {
+			logger.Error(fmt.Sprintf("Error updating KV pair: %v", updateResult.Error))
+			return &kvpb.SetKeyValueResponse{
+				Message:    "Failed to update key-value pair",
+				StatusCode: int64(StatusInternalServerError),
+			}, nil
+		}
+
+		logger.Info(fmt.Sprintf("Key-Value Pair %s updated successfully", key))
+		return &kvpb.SetKeyValueResponse{
+				Message:    "Key-value pair successfully updated",
+				StatusCode: int64(StatusOK),
+			}, nil
+	} else {
+		// Any other DB error
+		logger.Error(fmt.Sprintf("Database error: %v", KeyNotFoundError))
+		return &kvpb.SetKeyValueResponse{
+			Message:    "Database error",
+			StatusCode: int64(StatusInternalServerError),
+		}, nil
 	}
-	logger.Info(fmt.Sprintf("Key-Value Pair Already Exist!"))
-	return &kvpb.SetKeyValueResponse{
-			Message: "KV Pair Already Exist",
-			StatusCode : int64(StatusConflict),
-	}, nil
 }
