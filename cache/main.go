@@ -1,53 +1,46 @@
-package main
+package cache
 
-import "fmt"
-
-// Node is unexported, so only code in this package can access its fields
 type node struct {
-	key, value int
+	key, value string
 	prev, next *node
 }
 
-// newNode acts as a "friend" function — it can access private fields
-func newNode(key, value int) *node {
+
+func newNode(key, value string) *node {
 	return &node{key: key, value: value}
 }
 
-// dll (doubly linked list + map)
 type dll struct {
 	head *node
 	tail *node
-	m    map[int]*node
+	m    map[string]*node
 }
 
-// newDLL is another friend function, initializing dummy head/tail
 func newDLL() *dll {
-	head := newNode(-1, -1)
-	tail := newNode(-1, -1)
+	head := newNode("", "")
+	tail := newNode("", "")
 	head.next = tail
 	tail.prev = head
 	return &dll{
 		head: head,
 		tail: tail,
-		m:    make(map[int]*node),
+		m:    make(map[string]*node),
 	}
 }
 
-// addToFront adds a node right after head
-func (l *dll) addToFront(key, value int) {
+func (l *dll) addToFront(key, value string) {
 	nextNode := l.head.next
 	newNode := newNode(key, value)
 	l.head.next = newNode
-	nextNode.prev = newNode
 	newNode.prev = l.head
 	newNode.next = nextNode
+	nextNode.prev = newNode
 	l.m[key] = newNode
 }
 
-// deleteLastNode removes the least-recently-used node (before tail)
 func (l *dll) deleteLastNode() {
 	if l.tail.prev == l.head {
-		return // nothing to delete
+		return
 	}
 	delete(l.m, l.tail.prev.key)
 	prevToPrev := l.tail.prev.prev
@@ -55,7 +48,6 @@ func (l *dll) deleteLastNode() {
 	l.tail.prev = prevToPrev
 }
 
-// deleteNode removes a specific node from the list
 func (l *dll) deleteNode(n *node) {
 	delete(l.m, n.key)
 	left := n.prev
@@ -64,19 +56,17 @@ func (l *dll) deleteNode(n *node) {
 	right.prev = left
 }
 
-// get retrieves a value by key and moves the node to front
-func (l *dll) get(key int) int {
+func (l *dll) get(key string) (string, bool) {
 	if n, ok := l.m[key]; ok {
 		val := n.value
 		l.deleteNode(n)
 		l.addToFront(key, val)
-		return val
+		return val, true
 	}
-	return -1
+	return "", false
 }
 
-// addNode adds or updates a key; if full, removes LRU
-func (l *dll) addNode(key, value, capacity int) {
+func (l *dll) addNode(key, value string, capacity int) {
 	if n, ok := l.m[key]; ok {
 		l.deleteNode(n)
 		l.addToFront(key, value)
@@ -88,13 +78,11 @@ func (l *dll) addNode(key, value, capacity int) {
 	}
 }
 
-// LRUCache is the public interface — this struct can be exported
 type LRUCache struct {
 	capacity int
 	list     *dll
 }
 
-// NewLRUCache is the exported constructor
 func NewLRUCache(capacity int) *LRUCache {
 	return &LRUCache{
 		capacity: capacity,
@@ -102,10 +90,15 @@ func NewLRUCache(capacity int) *LRUCache {
 	}
 }
 
-func (c *LRUCache) Get(key int) int {
+func (c *LRUCache) Get(key string) (string, bool) {
 	return c.list.get(key)
 }
 
-func (c *LRUCache) Put(key, value int) {
+func (c *LRUCache) Put(key, value string) {
 	c.list.addNode(key, value, c.capacity)
+}
+func (c *LRUCache) DeleteKey(key string) {
+	if n, ok := c.list.m[key]; ok {
+		c.list.deleteNode(n)
+	}
 }

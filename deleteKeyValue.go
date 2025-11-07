@@ -45,8 +45,9 @@ func (KvServerManager *KvService) DeleteKeyValue(ctx context.Context,request *kv
 			StatusCode: int64(StatusInternalServerError),
 		}, nil
 	}
-
-	logger.Info(fmt.Sprintf("Key-Value Pair %s deleted successfully", key))
+	cache.DeleteKey(key);
+	logger.Info(fmt.Sprintf("Key-Value Pair %s deleted successfully from DB", key))
+	logger.Info(fmt.Sprintf("Key-Value Pair %s deleted successfully from Cache(if exist)", key))
 	return &kvpb.DeleteKeyValueResponse{
 		Message:    "Key-value pair successfully deleted",
 		StatusCode: int64(StatusOK),

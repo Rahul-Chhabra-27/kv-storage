@@ -20,8 +20,7 @@ func (KvServerManager *KvService) SetKeyValue(ctx context.Context, request *kvpb
 			StatusCode : int64(StatusBadRequest),
 		}, nil
 	}
-		// TODO : Check if this already present in cache or not.
-
+		
 		// Check if it's already present in the db
 		var existingKeyValuePair model.KV;
 		KeyNotFoundError := kvDbConnector.Where("key_name = ?", key).First(&existingKeyValuePair).Error
@@ -30,9 +29,11 @@ func (KvServerManager *KvService) SetKeyValue(ctx context.Context, request *kvpb
 			
 			newKVPair := &model.KV{ Key : key, Value : value}
 			// It will return a primary key in the result.
-			primaryKey := kvDbConnector.Create(newKVPair);
+			kvDbConnector.Create(newKVPair);
+			// Add it into the cacahe!
+			cache.Put(key,value);
 
-			logger.Info(fmt.Sprintf("Key-Value Pair %s created successfully with primary key %s", newKVPair.Key,primaryKey))
+			logger.Info(fmt.Sprintf("Key-Value Pair %s created successfully with primary key %s", newKVPair.Key,newKVPair.ID))
 
 			return &kvpb.SetKeyValueResponse{
 				Message: "Key-value pair successfully created",
@@ -40,22 +41,26 @@ func (KvServerManager *KvService) SetKeyValue(ctx context.Context, request *kvpb
 			}, nil
 	} else if KeyNotFoundError == nil {
 		// Key exists — update its value
-		updateResult := kvDbConnector.Model(&existingKeyValuePair).Update("value", value)
-		if updateResult.Error != nil {
-			logger.Error(fmt.Sprintf("Error updating KV pair: %v", updateResult.Error))
-			return &kvpb.SetKeyValueResponse{
-				Message:    "Failed to update key-value pair",
-				StatusCode: int64(StatusInternalServerError),
-			}, nil
-		}
+		// updateResult := kvDbConnector.Model(&existingKeyValuePair).Update("value", value)
+		// if updateResult.Error != nil {
+		// 	logger.Error(fmt.Sprintf("Error updating KV pair: %v", updateResult.Error))
+		// 	return &kvpb.SetKeyValueResponse{
+		// 		Message:    "Failed to update key-value pair",
+		// 		StatusCode: int64(StatusInternalServerError),
+		// 	}, nil
+		// }
 
-		logger.Info(fmt.Sprintf("Key-Value Pair %s updated successfully", key))
+		// logger.Info(fmt.Sprintf("Key-Value Pair %s updated successfully", key))
+		// return &kvpb.SetKeyValueResponse{
+		// 		Message:    "Key-value pair successfully updated",
+		// 		StatusCode: int64(StatusOK),
+		// 	}, nil
+		logger.Info(fmt.Sprintf("Key-Value Pair %s already present", key))
 		return &kvpb.SetKeyValueResponse{
-				Message:    "Key-value pair successfully updated",
-				StatusCode: int64(StatusOK),
-			}, nil
+				Message:    "Key-value pair already present",
+				StatusCode: int64(StatusConflict),
+		}, nil
 	} else {
-		// Any other DB error
 		logger.Error(fmt.Sprintf("Database error: %v", KeyNotFoundError))
 		return &kvpb.SetKeyValueResponse{
 			Message:    "Database error",

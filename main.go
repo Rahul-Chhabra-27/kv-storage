@@ -12,6 +12,7 @@ import (
 	"github.com/kv-storage/config"
 	kvpb "github.com/kv-storage/proto/kv"
 	"gorm.io/gorm"
+	cacheModule "github.com/kv-storage/cache"
 )
 
 const (
@@ -25,7 +26,7 @@ const (
 	StatusForbidden        = 403
 )
 var logger *zap.Logger
-
+var cache *cacheModule.LRUCache
 func init() {
 	var err error
 	logger, err = zap.NewDevelopment()
@@ -47,6 +48,9 @@ func startServer() {
 	// Log a message
 	logger.Info("Starting server...")
 	
+	// Initiaizing the cacahe
+	cache = cacheModule.NewLRUCache(2);
+
 	// Initialize the gotenv file..
 	err := godotenv.Load()
 	if err != nil {
