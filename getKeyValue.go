@@ -9,11 +9,9 @@ import (
 func (KvServerManager *KvService) GetKeyValue(ctx context.Context, request *kvpb.GetKVRequest) (*kvpb.GetKVResponse, error) {
 	// getting the key from request...
 	key := request.Key;
-	
 	// checking in the cache
 	value,isValueExist := cache.Get(key);
 	if isValueExist == true  {
-		logger.Info("Response is Coming from the Cache (CPU) Operation!");
 		return &kvpb.GetKVResponse{
 			Message:"Key found",
 			StatusCode : int64(StatusOK),

@@ -1,0 +1,4 @@
+POST http://localhost:8090/api/kv
+Content-Type: application/json
+
+{"key":"100","value":"hello"}

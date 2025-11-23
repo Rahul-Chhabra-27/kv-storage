@@ -1,5 +1,7 @@
 package main
 import (
+	"fmt"
+	hello "runtime"
 	"log"
 	"net"
 	"context"
@@ -13,6 +15,8 @@ import (
 	kvpb "github.com/kv-storage/proto/kv"
 	"gorm.io/gorm"
 	cacheModule "github.com/kv-storage/cache"
+	_ "net/http/pprof"
+	
 )
 
 const (
@@ -49,7 +53,7 @@ func startServer() {
 	logger.Info("Starting server...")
 	
 	// Initiaizing the cacahe
-	cache = cacheModule.NewLRUCache(2);
+	cache = cacheModule.NewLRUCache(200);
 
 	// Initialize the gotenv file..
 	err := godotenv.Load()
@@ -88,7 +92,7 @@ func startServer() {
 	// it connect to the gRPC server we just started and act as a grpc client!
 	connection, err := grpc.DialContext(
 		context.Background(),
-		"localhost: 50051",
+		"localhost:50051",
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -113,7 +117,18 @@ func startServer() {
 	
 }
 
+// This will print how many CPU cores Go is using
+func init() {
+    fmt.Println("GOMAXPROCS:", hello.GOMAXPROCS(0))
+}
 func main() {
+	//  Start pprof profiling server on :6060
+	go func() {
+		log.Println("pprof running at http://localhost:6060/debug/pprof/")
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			log.Fatalf("pprof server failed: %v", err)
+		}
+	}()
 	// Start the server
 	startServer()
 }

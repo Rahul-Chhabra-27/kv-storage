@@ -9,6 +9,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"github.com/kv-storage/model"
+	"time"
 )
 func DatabaseDsn() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
@@ -32,11 +33,18 @@ func ConnectDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Set connection pool limits
+	sqlDB, err := kvdb.DB()
+	if err != nil {
+		return nil, err
+	}
+	sqlDB.SetMaxOpenConns(2000)              // Max active connections
+	sqlDB.SetMaxIdleConns(100)              // Idle connections to keep
+	sqlDB.SetConnMaxLifetime(5 * time.Minute) // Recycle connections
 	// Migrate the schema
 	kvdb.AutoMigrate(&model.KV{})
 	return kvdb, nil
 }
 func UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
-	fmt.Println("--> UnaryInterceptor: ", info.FullMethod)
 	return handler(ctx, req)
 }
