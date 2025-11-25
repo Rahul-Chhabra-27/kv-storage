@@ -21,7 +21,6 @@ func (KvServerManager *KvService) GetKeyValue(ctx context.Context, request *kvpb
 	// Checking into the database
 	var keyValue model.KV
 	if err := kvDbConnector.Where("key_name = ?", key).First(&keyValue).Error; err != nil {
-		logger.Error("Key not found")
 		return &kvpb.GetKVResponse{
 			Message:    "Key not found",
 			StatusCode: int64(StatusNotFound),
@@ -30,7 +29,6 @@ func (KvServerManager *KvService) GetKeyValue(ctx context.Context, request *kvpb
 	if(!isValueExist) {
 		cache.Put(key,keyValue.Value);
 	}
-	logger.Info("Response is coming from the DB (I/O) Operation!");
 	return &kvpb.GetKVResponse{
 		Message:"Key found",
 		StatusCode : int64(StatusOK),

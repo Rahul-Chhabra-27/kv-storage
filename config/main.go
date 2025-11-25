@@ -1,16 +1,19 @@
 package config
+
 import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
-	"os"
-	"log"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"github.com/kv-storage/model"
+	"os"
 	"time"
+	"log"
 )
+
 func DatabaseDsn() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		os.Getenv("MYSQL_USER"),
@@ -20,6 +23,7 @@ func DatabaseDsn() string {
 		os.Getenv("MYSQL_DATABASE"),
 	)
 }
+
 func GoDotEnvVariable(key string) string {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -27,9 +31,12 @@ func GoDotEnvVariable(key string) string {
 	}
 	return os.Getenv(key)
 }
+
 func ConnectDB() (*gorm.DB, error) {
 	// Responsible for connecting to the database
-	kvdb, err := gorm.Open(mysql.Open(DatabaseDsn()), &gorm.Config{})
+	kvdb, err := gorm.Open(mysql.Open(DatabaseDsn()), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+})
 	if err != nil {
 		return nil, err
 	}
@@ -45,6 +52,7 @@ func ConnectDB() (*gorm.DB, error) {
 	kvdb.AutoMigrate(&model.KV{})
 	return kvdb, nil
 }
+
 func UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 	return handler(ctx, req)
 }
